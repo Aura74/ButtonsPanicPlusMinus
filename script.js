@@ -3,6 +3,7 @@ let countdownInterval;
 let increaseCounter = 0;
 const clockElement = document.getElementById("clock");
 const activateButton = document.querySelector(".buttonDownAC");
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
 function updateDisplay() {
   const minutes = String(Math.floor(countdownTime / 60)).padStart(2, "0");
@@ -68,6 +69,7 @@ function triggerAlarm() {
   clockElement.classList.add("blink");
   activateButton.classList.add("blink");
   activateButton.textContent = "AVAKTIVERA LARM";
+  playRepeatedBeep(); // Spela upp pip-ljud tre gånger per sekund
 }
 
 function stopAlarm() {
@@ -78,6 +80,32 @@ function stopAlarm() {
   clockElement.classList.remove("blink");
   activateButton.classList.remove("blink");
   activateButton.textContent = "Activate";
+}
+
+function playBeep() {
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // 440 Hz är tonen A4
+  oscillator.start();
+  gainNode.gain.exponentialRampToValueAtTime(
+    0.00001,
+    audioContext.currentTime + 0.1
+  ); // Kortare tid för snabbare pip
+  oscillator.stop(audioContext.currentTime + 0.1); // Kortare tid för snabbare pip
+}
+
+function playRepeatedBeep() {
+  let beepCount = 0;
+  const beepInterval = setInterval(() => {
+    playBeep();
+    beepCount += 1;
+    if (beepCount >= 3) {
+      clearInterval(beepInterval);
+    }
+  }, 333); // 3 gånger per sekund (1000ms / 3 ≈ 333ms)
 }
 
 activateButton.addEventListener("click", () => {
