@@ -4,24 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    />
-    <title>Document</title>
+    <title>Crystal Alarm</title>
   </head>
   <body>
-    <div class="button">
-      <label>
-        <input type="radio" id="down" name="check" value="down" />
-        <span></span>
-        <i class="fa-sharp fa-solid fa-arrow-down" id="down"></i>
-      </label>
-      <label>
-        <input type="radio" id="up" name="check" value="up" />
-        <span></span>
-        <i class="fa-sharp fa-solid fa-arrow-up" id="up"></i>
-      </label>
+    <div class="container">
+      <div class="status-bar">
+        <span class="icon">📶</span>
+        <span class="icon">WiFi</span>
+        <span class="icon">🔋</span>
+        <span class="icon">⏰</span>
+        <span class="icon">⚙️</span>
+      </div>
+      <div class="header-bar">
+        <span class="title">Crystal Alarm</span>
+        <span class="menu">⋮</span>
+      </div>
+      <div class="clock-display">
+        <span id="clock">00:00</span>
+      </div>
+      <div class="button-container">
+        <div class="button buttonDownleft"><span>-</span></div>
+        <div class="button buttonDownRight"><span>+</span></div>
+      </div>
+      <div class="buttonDownAC">
+        <span>Activate</span>
+      </div>
     </div>
+
+    <script src="script.js"></script>
   </body>
 </html>
