@@ -280,6 +280,11 @@ const phoneScreen = document.querySelector(".phone__screen");
 function applyTheme(dark) {
   phoneScreen.classList.toggle("phone__screen--dark", dark);
   localStorage.setItem("darkMode", dark ? "1" : "0");
+
+  // Update body bg + theme-color for mobile fullscreen mode
+  document.body.style.backgroundColor = dark ? "#1c1b1f" : "#f4efe9";
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = dark ? "#1c1b1f" : "#f4efe9";
 }
 
 darkModeToggle.addEventListener("change", () => {
