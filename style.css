@@ -1,182 +1,680 @@
-@keyframes blink {
-  0%,
-  50%,
-  100% {
-    opacity: 1;
-  }
-  25%,
-  75% {
-    opacity: 0;
-  }
-}
+/* ==========================================================================
+   Crystal Alarm — Material You (Android 16/17) style
+   ========================================================================== */
 
-body {
+/* ---------- Reset & Base ---------- */
+
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
-  font-family: roboto;
-  background-color: #ece8df;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.container {
-  width: 25%;
-  background-color: #d6d6d6; /* Lite mörkare bakgrund */
-  border: 2px solid #000; /* Ram runt hela layouten */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 10px;
   box-sizing: border-box;
 }
 
-.status-bar,
-.header-bar {
-  background-color: #ccc;
-  width: calc(
-    100% - 24px
-  ); /* Minskar bredden för att passa inom containerns padding */
-  height: 1cm;
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Ändrad från space-around till space-between för jämn fördelning */
-  padding: 0 10px;
-  margin: 0 auto 10px auto; /* Tillagt för att centrera inom containern */
-}
-
-.header-bar {
-  background-color: #f0f0f0;
-}
-
-.title {
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.menu {
-  font-size: 1.5rem;
-}
-
-.clock-display {
-  margin: 2cm auto 0 auto;
-  width: 80%;
-  height: 4cm;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-size: 5rem;
-  font-weight: bold;
-}
-
-.button-container {
-  display: flex;
-  justify-content: space-between;
-  width: 80%;
-  margin: 2cm auto 0 auto;
-}
-
-.button {
+body {
+  font-family: "Roboto", sans-serif;
+  background: linear-gradient(160deg, #3a1c71, #d76d77, #ffaf7b);
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 45%;
-  padding-bottom: 45%; /* Gör knapparna kvadratiska */
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ---------- Phone Frame ---------- */
+
+.phone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.phone__frame {
   position: relative;
-  font-size: 10rem;
-  color: #ffffff;
-  font-weight: bold;
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 13px rgba(0, 0, 0, 0.22);
-  cursor: pointer;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  width: 380px;
+  height: 800px;
+  background: #121212;
+  border-radius: 52px;
+  padding: 10px;
+  box-shadow:
+    inset 0 0 4px rgba(255, 255, 255, 0.05),
+    0 0 0 2px #2a2a2a,
+    0 40px 80px rgba(0, 0, 0, 0.55);
 }
 
-.button span {
+/* Side buttons */
+.phone__button {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  background: #1e1e1e;
+  border-radius: 2px 0 0 2px;
 }
 
-.buttonDownleft {
-  background: #0000ff; /* Blå */
+.phone__button--power {
+  right: -3px;
+  top: 190px;
+  width: 3px;
+  height: 56px;
+  border-radius: 0 2px 2px 0;
+  background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
 }
 
-.buttonDownRight {
-  background: #00ff00; /* Grön */
+.phone__button--vol-up {
+  left: -3px;
+  top: 155px;
+  width: 3px;
+  height: 44px;
+  background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
 }
 
-.buttonDownRight:hover {
-  background-color: rgb(0, 163, 27);
-  transition: 0.5s;
+.phone__button--vol-down {
+  left: -3px;
+  top: 210px;
+  width: 3px;
+  height: 44px;
+  background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
 }
 
-.buttonDownleft:hover {
-  background-color: rgb(86, 0, 247);
-  transition: 0.5s;
-}
-
-.button:active {
-  transform: scale(0.95);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18), 0 6px 6px rgba(0, 0, 0, 0.22);
-}
-
-.buttonDownAC-container {
-  display: flex;
-  justify-content: center;
-  width: 80%;
-  margin: 2cm auto 0 auto;
-  height: 250px;
-}
-
-.buttonDownAC {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #ff0000; /* Röd */
-  color: #ffffff;
-  width: calc(
-    100%
-  ); /* Gör knappen lika bred som två knappar tillsammans minus deras margin */
-  height: calc(
-    45% * 2
-  ); /* Gör knappen dubbelt så hög som bredden på de två knapparna tillsammans */
-  text-transform: uppercase;
-  letter-spacing: 0.05rem;
-  border-radius: 0.3rem;
-  font-size: 1.8rem;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 13px rgba(0, 0, 0, 0.22);
+/* Screen */
+.phone__screen {
   position: relative;
-}
-
-.buttonDownAC span {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   width: 100%;
   height: 100%;
-  text-align: center;
-  white-space: nowrap;
+  background: #f4efe9;
+  border-radius: 44px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Camera punch-hole */
+.phone__camera {
   position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  background: #0a0a0a;
+  border-radius: 50%;
+  z-index: 50;
+  box-shadow:
+    0 0 0 2px #1a1a1a,
+    inset 0 0 3px rgba(30, 60, 120, 0.4);
 }
 
-.buttonDownAC:hover {
-  background-color: rgb(161, 1, 1);
-  transition: 0.5s;
+/* ---------- Status Bar ---------- */
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 24px;
+  height: 34px;
+  flex-shrink: 0;
+  z-index: 10;
 }
 
-.buttonDownAC:active {
-  transform: scale(0.95);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18), 0 6px 6px rgba(0, 0, 0, 0.22);
+.status-bar__clock {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1c1b1f;
 }
 
-.blink {
-  animation: blink 1s infinite;
+.status-bar__icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-bar__icon {
+  font-size: 17px;
+  color: #1c1b1f;
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 20;
+}
+
+/* ---------- App Bar ---------- */
+
+.app-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 16px 4px 20px;
+  flex-shrink: 0;
+}
+
+.app-bar__select {
+  font-family: "Roboto", sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: #1c1b1f;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z' fill='%231c1b1f'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  padding-right: 24px;
+}
+
+.app-bar__select:focus {
+  outline: none;
+}
+
+.app-bar__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #49454f;
+  transition: background 0.2s;
+}
+
+.app-bar__action:hover {
+  background: rgba(28, 27, 31, 0.08);
+}
+
+.app-bar__action .material-symbols-outlined {
+  font-size: 24px;
+}
+
+/* ---------- App Content ---------- */
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 24px 8px;
+  gap: 28px;
+}
+
+/* ---------- Timer Ring ---------- */
+
+.timer {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #dce4f2, #c7d3e8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  border: 5px solid #a3b8d8;
+  transition: all 0.3s;
+}
+
+.timer__value {
+  font-size: 52px;
+  font-weight: 300;
+  color: #1c1b1f;
+  letter-spacing: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer__label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #79747e;
+  letter-spacing: 1.5px;
+  margin-top: 2px;
+}
+
+/* Timer — counting down */
+.timer--active {
+  border-color: #006d3b;
+  background: linear-gradient(145deg, #d4edda, #b8dcc6);
+}
+
+/* Timer — alarming */
+.timer--alarming {
+  border-color: #dc362e;
+  background: linear-gradient(145deg, #fde4e4, #f8c8c8);
+  animation: alarm-ring 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes alarm-ring {
+  from {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 0 rgba(220, 54, 46, 0.3),
+      inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  }
+  to {
+    transform: scale(1.03);
+    box-shadow:
+      0 0 36px 8px rgba(220, 54, 46, 0.35),
+      inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* ---------- Controls (+/−) ---------- */
+
+.controls {
+  display: flex;
+  gap: 36px;
+}
+
+.controls__btn {
+  width: 80px;
+  height: 80px;
+  border: none;
+  border-radius: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.controls__btn .material-symbols-outlined {
+  font-size: 38px;
+  font-variation-settings: "wght" 500;
+}
+
+.controls__btn--decrease {
+  background: #e8def8;
+  color: #4f378b;
+}
+
+.controls__btn--decrease:hover {
+  background: #d9cbf0;
+}
+
+.controls__btn--increase {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+
+.controls__btn--increase:hover {
+  background: #b6ddb8;
+}
+
+.controls__btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.controls__btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Activate Button ---------- */
+
+.activate-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 85%;
+  padding: 17px 32px;
+  border-radius: 28px;
+  border: none;
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #fff;
+  background: #ba1a1a;
+  box-shadow: 0 3px 12px rgba(186, 26, 26, 0.35);
+}
+
+.activate-btn__icon {
+  font-size: 22px;
+  font-variation-settings: "FILL" 1;
+}
+
+.activate-btn:hover {
+  background: #a21616;
+  box-shadow: 0 5px 20px rgba(186, 26, 26, 0.45);
+}
+
+.activate-btn:active {
+  transform: scale(0.97);
+}
+
+/* Active (counting down) */
+.activate-btn--active {
+  background: #006d3b;
+  box-shadow: 0 3px 12px rgba(0, 109, 59, 0.35);
+}
+
+.activate-btn--active:hover {
+  background: #005a31;
+  box-shadow: 0 5px 20px rgba(0, 109, 59, 0.45);
+}
+
+/* Alarming */
+.activate-btn--alarming {
+  background: #ff1744;
+  box-shadow: 0 3px 12px rgba(255, 23, 68, 0.4);
+  animation: btn-pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes btn-pulse {
+  to {
+    box-shadow: 0 0 28px 6px rgba(255, 23, 68, 0.55);
+  }
+}
+
+/* ---------- Settings Overlay ---------- */
+
+.settings {
+  position: absolute;
+  inset: 0;
+  background: #f4efe9;
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 44px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.settings--open {
+  transform: translateX(0);
+}
+
+.settings__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 44px 16px 12px;
+  flex-shrink: 0;
+}
+
+.settings__title {
+  font-size: 22px;
+  font-weight: 400;
+  color: #1c1b1f;
+}
+
+.settings__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #1c1b1f;
+  transition: background 0.2s;
+}
+
+.settings__back:hover {
+  background: rgba(28, 27, 31, 0.08);
+}
+
+.settings__body {
+  padding: 8px 20px 24px;
+  flex: 1;
+}
+
+.settings__group {
+  margin-bottom: 24px;
+}
+
+.settings__group-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6750a4;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 0 4px 6px;
+}
+
+.settings__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 4px;
+  border-bottom: 1px solid rgba(28, 27, 31, 0.08);
+  font-size: 15px;
+  color: #1c1b1f;
+}
+
+.settings__select {
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  padding: 6px 10px;
+  border: 1px solid #cac4d0;
+  border-radius: 10px;
+  background: #fff;
+  color: #1c1b1f;
+}
+
+.settings__range {
+  width: 120px;
+  accent-color: #6750a4;
+}
+
+.settings__value {
+  color: #79747e;
+  font-size: 14px;
+}
+
+/* ---------- Toggle Switch (Material You) ---------- */
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 32px;
+}
+
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle__track {
+  position: absolute;
+  inset: 0;
+  background: #c9c5ca;
+  border-radius: 16px;
+  transition: background 0.25s;
+  cursor: pointer;
+  border: 2px solid #79747e;
+}
+
+.toggle__thumb {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  background: #79747e;
+  border-radius: 50%;
+  transition: all 0.25s;
+}
+
+.toggle input:checked + .toggle__track {
+  background: #6750a4;
+  border-color: #6750a4;
+}
+
+.toggle input:checked + .toggle__track .toggle__thumb {
+  left: 28px;
+  background: #fff;
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------- Gesture Bar ---------- */
+
+.gesture-bar {
+  padding: 6px 0 14px;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gesture-bar__pill {
+  width: 110px;
+  height: 4px;
+  background: #1c1b1f;
+  border-radius: 2px;
+  opacity: 0.22;
+}
+
+/* ---------- Dark Mode ---------- */
+
+.phone__screen--dark {
+  background: #1c1b1f;
+}
+
+.phone__screen--dark .status-bar__clock,
+.phone__screen--dark .status-bar__icon {
+  color: #e6e1e5;
+}
+
+.phone__screen--dark .app-bar__select {
+  color: #e6e1e5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z' fill='%23e6e1e5'/%3E%3C/svg%3E");
+}
+
+.phone__screen--dark .app-bar__action {
+  color: #cac4d0;
+}
+
+.phone__screen--dark .app-bar__action:hover {
+  background: rgba(230, 225, 229, 0.08);
+}
+
+.phone__screen--dark .timer {
+  background: linear-gradient(145deg, #2d3040, #252836);
+  border-color: #7b8aad;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.05);
+}
+
+.phone__screen--dark .timer__value {
+  color: #e6e1e5;
+}
+
+.phone__screen--dark .timer__label {
+  color: #938f99;
+}
+
+.phone__screen--dark .timer--active {
+  background: linear-gradient(145deg, #1a3328, #15291f);
+  border-color: #4caf6a;
+}
+
+.phone__screen--dark .timer--alarming {
+  background: linear-gradient(145deg, #3d1a1a, #331515);
+  border-color: #ff5252;
+}
+
+.phone__screen--dark .controls__btn--decrease {
+  background: #3b2d5c;
+  color: #d0bcff;
+}
+
+.phone__screen--dark .controls__btn--decrease:hover {
+  background: #4a3870;
+}
+
+.phone__screen--dark .controls__btn--increase {
+  background: #1e3a1e;
+  color: #a5d6a7;
+}
+
+.phone__screen--dark .controls__btn--increase:hover {
+  background: #264d26;
+}
+
+.phone__screen--dark .gesture-bar__pill {
+  background: #e6e1e5;
+}
+
+/* Settings dark mode */
+.phone__screen--dark .settings {
+  background: #1c1b1f;
+}
+
+.phone__screen--dark .settings__title {
+  color: #e6e1e5;
+}
+
+.phone__screen--dark .settings__back {
+  color: #e6e1e5;
+}
+
+.phone__screen--dark .settings__back:hover {
+  background: rgba(230, 225, 229, 0.08);
+}
+
+.phone__screen--dark .settings__group-title {
+  color: #d0bcff;
+}
+
+.phone__screen--dark .settings__item {
+  color: #e6e1e5;
+  border-bottom-color: rgba(230, 225, 229, 0.08);
+}
+
+.phone__screen--dark .settings__select {
+  background: #2b2930;
+  color: #e6e1e5;
+  border-color: #49454f;
+}
+
+.phone__screen--dark .settings__value {
+  color: #938f99;
+}
+
+.phone__screen--dark .settings__range {
+  accent-color: #d0bcff;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-height: 860px) {
+  .phone__frame {
+    height: 720px;
+  }
+}
+
+@media (max-width: 420px) {
+  .phone__frame {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .phone__screen {
+    border-radius: 0;
+  }
+
+  .phone__button,
+  .phone__camera {
+    display: none;
+  }
 }

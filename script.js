@@ -1,126 +1,311 @@
-let countdownTime = 0;
-let countdownInterval;
-let increaseCounter = 0;
-const clockElement = document.getElementById("clock");
-const activateButton = document.querySelector(".buttonDownAC");
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+/* ==========================================================================
+   Crystal Alarm — App Logic
+   ========================================================================== */
 
-function updateDisplay() {
-  const minutes = String(Math.floor(countdownTime / 60)).padStart(2, "0");
-  const seconds = String(countdownTime % 60).padStart(2, "0");
-  clockElement.textContent = `${minutes}:${seconds}`;
+// ---- DOM refs ----
+const clock = document.getElementById("clock");
+const statusClock = document.getElementById("statusClock");
+const timerDisplay = document.getElementById("timerDisplay");
+const increaseBtn = document.getElementById("increaseBtn");
+const decreaseBtn = document.getElementById("decreaseBtn");
+const activateBtn = document.getElementById("activateBtn");
+const activateLabel = activateBtn.querySelector(".activate-btn__label");
+const activateIcon = activateBtn.querySelector(".activate-btn__icon");
+const settingsBtn = document.getElementById("settingsBtn");
+const settingsOverlay = document.getElementById("settingsOverlay");
+const settingsBackBtn = document.getElementById("settingsBackBtn");
+const volumeSlider = document.getElementById("volumeSlider");
+const alarmSoundSelect = document.getElementById("alarmSound");
+const vibrateToggle = document.getElementById("vibrateToggle");
+
+// ---- State ----
+let timerSeconds = 0;
+let countdownInterval = null;
+let alarmInterval = null;
+let isCountingDown = false;
+let isAlarming = false;
+let audioCtx = null;
+
+// ---- AudioContext (lazy, avoids browser autoplay block) ----
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+  return audioCtx;
 }
 
-function increaseTime() {
-  increaseCounter += 1;
-  if (increaseCounter <= 3) {
-    countdownTime += 5; // Första tre gångerna ökar med 5 sekunder
-  } else if (increaseCounter <= 6) {
-    countdownTime += 15; // Fjärde till sjätte gången ökar med 15 sekunder
-  } else if (countdownTime < 180) {
-    countdownTime += 30; // Därefter ökar med 30 sekunder tills man når 3 minuter
+// ---- Status-bar clock ----
+function updateStatusClock() {
+  const now = new Date();
+  statusClock.textContent =
+    String(now.getHours()).padStart(2, "0") +
+    ":" +
+    String(now.getMinutes()).padStart(2, "0");
+}
+updateStatusClock();
+setInterval(updateStatusClock, 10000);
+
+// ---- Timer display ----
+function updateTimerDisplay() {
+  const m = String(Math.floor(timerSeconds / 60)).padStart(2, "0");
+  const s = String(timerSeconds % 60).padStart(2, "0");
+  clock.textContent = m + ":" + s;
+  updateButtonState();
+}
+
+// ---- Button state based on timer ----
+function updateButtonState() {
+  if (isCountingDown || isAlarming) return;
+
+  decreaseBtn.disabled = timerSeconds === 0;
+
+  if (timerSeconds === 0) {
+    activateLabel.textContent = "Larma";
+    activateIcon.textContent = "crisis_alert";
   } else {
-    countdownTime += 60; // Efter 3 minuter ökar med 1 minut
+    activateLabel.textContent = "Aktivera";
+    activateIcon.textContent = "alarm";
   }
-  updateDisplay();
+}
+
+// ---- Increase / Decrease ----
+function increaseTime() {
+  if (isCountingDown || isAlarming) return;
+
+  if (timerSeconds < 15) timerSeconds += 5;
+  else if (timerSeconds < 60) timerSeconds += 15;
+  else if (timerSeconds < 180) timerSeconds += 30;
+  else timerSeconds += 60;
+
+  if (timerSeconds > 3599) timerSeconds = 3599; // max 59:59
+  updateTimerDisplay();
 }
 
 function decreaseTime() {
-  if (countdownTime >= 60) {
-    countdownTime -= 60;
-  } else if (countdownTime >= 30 && increaseCounter > 6) {
-    countdownTime -= 30;
-  } else if (
-    countdownTime >= 15 &&
-    increaseCounter <= 6 &&
-    increaseCounter > 3
-  ) {
-    countdownTime -= 15;
-  } else if (countdownTime >= 5 && increaseCounter <= 3) {
-    countdownTime -= 5;
-  }
-  updateDisplay();
+  if (isCountingDown || isAlarming) return;
+
+  if (timerSeconds > 180) timerSeconds -= 60;
+  else if (timerSeconds > 60) timerSeconds -= 30;
+  else if (timerSeconds > 15) timerSeconds -= 15;
+  else if (timerSeconds > 0) timerSeconds -= 5;
+
+  if (timerSeconds < 0) timerSeconds = 0;
+  updateTimerDisplay();
 }
 
-function startCountdown() {
-  if (countdownTime === 0) {
-    triggerAlarm();
+// ---- Activate handler ----
+function handleActivate() {
+  getAudioCtx(); // unlock audio
+
+  if (isAlarming) {
+    stopAlarm();
     return;
   }
-
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
+  if (isCountingDown) {
+    stopCountdown();
+    return;
   }
+  if (timerSeconds === 0) {
+    triggerAlarm();
+  } else {
+    startCountdown();
+  }
+}
 
-  activateButton.textContent = "AVAKTIVERA LARM";
+// ---- Countdown ----
+function startCountdown() {
+  isCountingDown = true;
+  activateBtn.classList.add("activate-btn--active");
+  activateLabel.textContent = "Avbryt";
+  activateIcon.textContent = "alarm_off";
+  timerDisplay.classList.add("timer--active");
+  setControlsDisabled(true);
 
   countdownInterval = setInterval(() => {
-    if (countdownTime > 0) {
-      countdownTime -= 1;
-      updateDisplay();
-    } else {
+    timerSeconds--;
+    updateTimerDisplay();
+    if (timerSeconds <= 0) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      isCountingDown = false;
+      timerDisplay.classList.remove("timer--active");
       triggerAlarm();
     }
   }, 1000);
 }
 
-function triggerAlarm() {
+function stopCountdown() {
   clearInterval(countdownInterval);
-  clockElement.classList.add("blink");
-  activateButton.classList.add("blink");
-  activateButton.textContent = "AVAKTIVERA LARM";
-  playRepeatedBeep(); // Spela upp pip-ljud tre gånger per sekund
+  countdownInterval = null;
+  isCountingDown = false;
+  timerSeconds = 0;
+  updateTimerDisplay();
+  timerDisplay.classList.remove("timer--active");
+  resetUI();
+}
+
+// ---- Alarm ----
+function triggerAlarm() {
+  isAlarming = true;
+  timerSeconds = 0;
+  updateTimerDisplay();
+
+  activateBtn.classList.remove("activate-btn--active");
+  activateBtn.classList.add("activate-btn--alarming");
+  activateLabel.textContent = "Stoppa larm";
+  activateIcon.textContent = "alarm_off";
+  timerDisplay.classList.add("timer--alarming");
+  setControlsDisabled(true);
+
+  playAlarmLoop();
+
+  if (vibrateToggle.checked && navigator.vibrate) {
+    navigator.vibrate([300, 100, 300, 100, 300, 200, 300, 100, 300, 100, 300]);
+  }
 }
 
 function stopAlarm() {
-  clearInterval(countdownInterval);
-  countdownTime = 0;
-  increaseCounter = 0; // Återställ räknaren
-  updateDisplay();
-  clockElement.classList.remove("blink");
-  activateButton.classList.remove("blink");
-  activateButton.textContent = "Activate";
-}
+  isAlarming = false;
 
-function playBeep() {
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // 440 Hz är tonen A4
-  oscillator.start();
-  gainNode.gain.exponentialRampToValueAtTime(
-    0.00001,
-    audioContext.currentTime + 0.1
-  ); // Kortare tid för snabbare pip
-  oscillator.stop(audioContext.currentTime + 0.1); // Kortare tid för snabbare pip
-}
-
-function playRepeatedBeep() {
-  let beepCount = 0;
-  const beepInterval = setInterval(() => {
-    playBeep();
-    beepCount += 1;
-    if (beepCount >= 3) {
-      clearInterval(beepInterval);
-    }
-  }, 333); // 3 gånger per sekund (1000ms / 3 ≈ 333ms)
-}
-
-activateButton.addEventListener("click", () => {
-  if (activateButton.classList.contains("blink")) {
-    stopAlarm();
-  } else {
-    startCountdown();
+  if (alarmInterval) {
+    clearInterval(alarmInterval);
+    alarmInterval = null;
   }
+  if (navigator.vibrate) navigator.vibrate(0);
+
+  activateBtn.classList.remove("activate-btn--alarming");
+  timerDisplay.classList.remove("timer--alarming");
+  resetUI();
+}
+
+function resetUI() {
+  activateBtn.classList.remove("activate-btn--active", "activate-btn--alarming");
+  setControlsDisabled(false);
+  updateButtonState();
+}
+
+function setControlsDisabled(disabled) {
+  increaseBtn.disabled = disabled;
+  decreaseBtn.disabled = disabled;
+}
+
+// ---- Sound engine ----
+function playAlarmLoop() {
+  const soundType = alarmSoundSelect.value;
+  const volume = volumeSlider.value / 100;
+
+  playPattern(soundType, volume);
+  alarmInterval = setInterval(() => {
+    if (isAlarming) {
+      playPattern(soundType, volume);
+    } else {
+      clearInterval(alarmInterval);
+      alarmInterval = null;
+    }
+  }, 1400);
+}
+
+function playPattern(type, vol) {
+  const ctx = getAudioCtx();
+  const t = ctx.currentTime;
+
+  switch (type) {
+    case "beep":
+      scheduleBeep(ctx, t, vol);
+      break;
+    case "siren":
+      scheduleSiren(ctx, t, vol);
+      break;
+    case "bell":
+      scheduleBell(ctx, t, vol);
+      break;
+  }
+}
+
+function scheduleBeep(ctx, t, vol) {
+  for (let i = 0; i < 3; i++) {
+    const start = t + i * 0.22;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "square";
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(vol * 0.25, start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.15);
+    osc.start(start);
+    osc.stop(start + 0.16);
+  }
+}
+
+function scheduleSiren(ctx, t, vol) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = "sawtooth";
+  gain.gain.setValueAtTime(vol * 0.18, t);
+  osc.frequency.setValueAtTime(600, t);
+  osc.frequency.linearRampToValueAtTime(1200, t + 0.5);
+  osc.frequency.linearRampToValueAtTime(600, t + 1);
+  gain.gain.setValueAtTime(vol * 0.18, t + 1);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+  osc.start(t);
+  osc.stop(t + 1.25);
+}
+
+function scheduleBell(ctx, t, vol) {
+  for (let i = 0; i < 2; i++) {
+    const start = t + i * 0.5;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.value = 1047;
+    gain.gain.setValueAtTime(vol * 0.3, start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+    osc.start(start);
+    osc.stop(start + 0.42);
+  }
+}
+
+// ---- Dark mode ----
+const darkModeToggle = document.getElementById("darkModeToggle");
+const phoneScreen = document.querySelector(".phone__screen");
+
+function applyTheme(dark) {
+  phoneScreen.classList.toggle("phone__screen--dark", dark);
+  localStorage.setItem("darkMode", dark ? "1" : "0");
+}
+
+darkModeToggle.addEventListener("change", () => {
+  applyTheme(darkModeToggle.checked);
 });
 
-document
-  .querySelector(".buttonDownRight")
-  .addEventListener("click", increaseTime);
-document
-  .querySelector(".buttonDownleft")
-  .addEventListener("click", decreaseTime);
+// Restore saved preference
+if (localStorage.getItem("darkMode") === "1") {
+  darkModeToggle.checked = true;
+  applyTheme(true);
+}
 
-updateDisplay();
+// ---- Settings ----
+settingsBtn.addEventListener("click", () => {
+  settingsOverlay.classList.add("settings--open");
+});
+
+settingsBackBtn.addEventListener("click", () => {
+  settingsOverlay.classList.remove("settings--open");
+});
+
+// ---- Event listeners ----
+increaseBtn.addEventListener("click", increaseTime);
+decreaseBtn.addEventListener("click", decreaseTime);
+activateBtn.addEventListener("click", handleActivate);
+
+// ---- Init ----
+updateTimerDisplay();
+decreaseBtn.disabled = true;
